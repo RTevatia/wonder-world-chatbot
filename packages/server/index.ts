@@ -41,23 +41,29 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       return;
    }
 
-   const { prompt, conversationId } = req.body;
+   try {
+      const { prompt, conversationId } = req.body;
 
-   const previousResponseId = conversations.get(conversationId);
+      const previousResponseId = conversations.get(conversationId);
 
-   const response = await client.responses.create({
-      model: 'gpt-4o-mini',
-      input: prompt,
-      temperature: 0.2,
-      max_output_tokens: 100,
-      previous_response_id: previousResponseId,
-   });
+      const response = await client.responses.create({
+         model: 'gpt-4o-mini!', // intentionally introduced a bug in the model by adding !
+         input: prompt,
+         temperature: 0.2,
+         max_output_tokens: 100,
+         previous_response_id: previousResponseId,
+      });
 
-   conversations.set(conversationId, response.id);
+      conversations.set(conversationId, response.id);
 
-   res.json({
-      message: response.output_text,
-   });
+      res.json({
+         message: response.output_text,
+      });
+   } catch (error) {
+      res.status(500).json({
+         error: 'Failed to generate a response',
+      });
+   }
 });
 
 app.listen(port, () => {
