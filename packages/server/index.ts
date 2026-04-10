@@ -1,8 +1,9 @@
-import express from 'express';
-import type { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import type { Request, Response } from 'express';
+import express from 'express';
 import OpenAI from 'openai';
-import { string, z } from 'zod';
+import { z } from 'zod';
+import { conversationRepository} from './repositories/conversation.repository';
 
 dotenv.config();
 
@@ -23,8 +24,6 @@ app.get('/api/hello', (req: Request, res: Response) => {
    res.json({ message: 'Hello world!' });
 });
 
-const conversations = new Map<string, string>();
-
 const chatSchema = z.object({
    prompt: z
       .string()
@@ -44,17 +43,15 @@ app.post('/api/chat', async (req: Request, res: Response) => {
    try {
       const { prompt, conversationId } = req.body;
 
-      const previousResponseId = conversations.get(conversationId);
-
       const response = await client.responses.create({
-         model: 'gpt-4o-mini!', // intentionally introduced a bug in the model by adding !
+         model: 'gpt-4o-mini',
          input: prompt,
          temperature: 0.2,
          max_output_tokens: 100,
-         previous_response_id: previousResponseId,
+         previous_response_id: conversationRepository.getLastResponseId(conversationId),
       });
 
-      conversations.set(conversationId, response.id);
+      conversationRepository.setLastResponseId(conversationId, response.id);
 
       res.json({
          message: response.output_text,
