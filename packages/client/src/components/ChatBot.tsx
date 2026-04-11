@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 import { FaArrowUp } from 'react-icons/fa';
 import { useForm } from 'react-hook-form';
 import { Button } from './ui/button';
@@ -43,13 +44,18 @@ const ChatBot = () => {
 
    return (
       <div>
-         <div className='flex flex-col gap-3 mb-10'>
+         <div className="flex flex-col gap-3 mb-10">
             {messages.map((message, index) => (
-               <p key={index} className={`px-3 py-1 rounded-xl ${
-                message.role === 'user'
-                ? 'bg-blue-600 text-white self-end'
-                : 'bg-gray-100 text-black self-start'
-               }`}>{message.content}</p>
+               <p
+                  key={index}
+                  className={`px-3 py-1 rounded-xl ${
+                     message.role === 'user'
+                        ? 'bg-blue-600 text-white self-end'
+                        : 'bg-gray-100 text-black self-start'
+                  }`}
+               >
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+               </p>
             ))}
          </div>
          <form
